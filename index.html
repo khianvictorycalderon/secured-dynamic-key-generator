@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Key Generator</title>
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --card2: #f1f5f9;
+  --line: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 20% 10%, #e0f2fe, transparent 35%),
+              radial-gradient(circle at 90% 90%, #f1f5f9, transparent 35%),
+              var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app {
+  width: min(760px, 100%);
+  padding: 34px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #ffffffed;
+  box-shadow: 0 20px 50px #0f172a0f;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 8px 0;
+  font-size: clamp(32px, 7vw, 52px);
+  line-height: 1;
+  letter-spacing: -.05em;
+  color: var(--text);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.section {
+  margin-top: 26px;
+}
+
+.label {
+  margin: 0 0 11px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.option {
+  position: relative;
+  cursor: pointer;
+}
+
+.option input {
+  position: absolute;
+  opacity: 0;
+}
+
+.option span {
+  min-height: 78px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--card2);
+  color: var(--muted);
+  transition: .15s;
+}
+
+.option span b {
+  font-family: monospace;
+  font-size: 18px;
+}
+
+.option span small {
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.option:hover span {
+  border-color: #2563eb80;
+  transform: translateY(-1px);
+}
+
+.option input:checked + span {
+  border-color: var(--accent);
+  background: #eff6ff;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px #2563eb33;
+}
+
+.input {
+  width: 100%;
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline: 0;
+  background: #fff;
+  color: var(--text);
+  font: 700 16px monospace;
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px #2563eb1c;
+}
+
+.hint {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.legend b {
+  color: var(--text);
+  font-family: monospace;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+button {
+  border: 0;
+  border-radius: 13px;
+  padding: 14px 18px;
+  cursor: pointer;
+  font: 800 14px inherit;
+  color: #fff;
+  transition: .15s;
+}
+
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+
+.generate {
+  flex: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 10px 20px #2563eb26;
+}
+
+.copy {
+  background: var(--card2);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.copy:hover {
+  background: #e2e8f0;
+}
+
+.output {
+  margin-top: 24px;
+  min-height: 80px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #f8fafc;
+  font: 800 clamp(18px, 4vw, 24px)/1.5 monospace;
+  letter-spacing: .035em;
+  color: var(--text);
+}
+
+.placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Strength Meter Components */
+.strength-container {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.strength-bar-bg {
+  height: 8px;
+  width: 100%;
+  background-color: var(--card2);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.strength-bar-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 4px;
+}
+
+.strength-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.status {
+  min-height: 20px;
+  margin-top: 9px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status.error { color: var(--danger); }
+.status.success { color: var(--success); }
+
+.note {
+  margin-top: 20px;
+  padding: 13px 15px;
+  border: 1px solid #10b98133;
+  background: #ecfdf5;
+  border-radius: 13px;
+  color: #047857;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+@media(max-width: 600px) {
+  .app { padding: 24px; }
+  .options { grid-template-columns: repeat(2, 1fr); }
+  .actions { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="eyebrow">Offline utility</div>
+  <h1>Random Key Generator</h1>
+  <p class="subtitle">Generate random keys locally in your browser. No internet, libraries, or external files required.</p>
+
+  <section class="section">
+    <p class="label">Character sets</p>
+    <div class="options">
+      <label class="option"><input type="checkbox" name="set" value="lower" checked><span><b>abc</b><small>Small Letters</small></span></label>
+      <label class="option"><input type="checkbox" name="set" value="upper" checked><span><b>ABC</b><small>Capital Letters</small></span></label>
+      <label class="option"><input type="checkbox" name="set" value="number" checked><span><b>123</b><small>Numbers</small></span></label>
+      <label class="option"><input type="checkbox" name="set" value="special" checked><span><b>!@#</b><small>Special Characters</small></span></label>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="label">Length or pattern</p>
+    <input id="length" class="input" type="text" value="32" placeholder="32 or XXX-NNN-YYY" autocomplete="off" spellcheck="false">
+    <p class="hint">Number = random characters up to that length. Pattern characters are case-sensitive:</p>
+    <div class="legend">
+      <span><b>X</b> Capital</span><span><b>Y</b> Small</span><span><b>Z</b> Special</span>
+      <span><b>N</b> Number</span><span><b>-</b> Fixed</span>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="generate" id="generate" type="button">Generate Key</button>
+    <button class="copy" id="copy" type="button">Copy</button>
+  </div>
+
+  <div id="output" class="output placeholder">Your generated key will appear here</div>
+  
+  <div class="strength-container" id="strength-container" style="display: none;">
+    <div class="strength-bar-bg">
+      <div id="strength-bar" class="strength-bar-fill"></div>
+    </div>
+    <div id="strength-text" class="strength-text">Strength: N/A</div>
+  </div>
+
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+
+  <div class="note">
+    <strong>Secure randomness:</strong> uses the browser's built-in
+    <code>crypto.getRandomValues()</code> with rejection sampling, so it does not rely on
+    Math.random() or an internet service.
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var CHARSETS = {
+    lower: "abcdefghijklmnopqrstuvwxyz",
+    upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    number: "0123456789",
+    special: "!@#$%^&*()_+-=[]{}|;:,.<>?/~`"
+  };
+
+  var TOKEN = { X:"upper", Y:"lower", Z:"special", N:"number" };
+
+  var lengthInput = document.getElementById("length");
+  var output = document.getElementById("output");
+  var status = document.getElementById("status");
+  var generateButton = document.getElementById("generate");
+  var copyButton = document.getElementById("copy");
+  var strengthContainer = document.getElementById("strength-container");
+  var strengthBar = document.getElementById("strength-bar");
+  var strengthText = document.getElementById("strength-text");
+
+  function selectedSets() {
+    var boxes = document.querySelectorAll('input[name="set"]:checked');
+    var sets = [];
+    for (var i = 0; i < boxes.length; i++) sets.push(boxes[i].value);
+    return sets;
+  }
+
+  function randomInt(max) {
+    if (!Number.isInteger(max) || max < 1 || max > 4294967296) {
+      throw new Error("Invalid random range.");
+    }
+
+    var values = new Uint32Array(1);
+    var limit = Math.floor(4294967296 / max) * max;
+
+    do {
+      crypto.getRandomValues(values);
+    } while (values[0] >= limit);
+
+    return values[0] % max;
+  }
+
+  function randomChar(chars) {
+    return chars.charAt(randomInt(chars.length));
+  }
+
+  function randomLength(length, sets) {
+    var pool = "";
+    for (var i = 0; i < sets.length; i++) pool += CHARSETS[sets[i]];
+
+    if (!pool) throw new Error("Select at least one character set.");
+
+    var result = "";
+    for (var j = 0; j < length; j++) result += randomChar(pool);
+    return result;
+  }
+
+  function randomPattern(pattern, sets) {
+    var enabled = {};
+    for (var i = 0; i < sets.length; i++) enabled[sets[i]] = true;
+
+    var result = "";
+
+    for (var j = 0; j < pattern.length; j++) {
+      var ch = pattern.charAt(j);
+
+      if (ch === "-") {
+        result += "-";
+        continue;
+      }
+
+      var setName = TOKEN[ch];
+
+      if (!setName) {
+        throw new Error('Invalid "' + ch + '". Use only X, Y, Z, N and -.');
+      }
+
+      if (!enabled[setName]) {
+        var names = {
+          upper:"Capital Letters", lower:"Small Letters",
+          special:"Special Characters", number:"Numbers"
+        };
+        throw new Error('Enable "' + names[setName] + '" to use "' + ch + '".');
+      }
+
+      result += randomChar(CHARSETS[setName]);
+    }
+
+    return result;
+  }
+
+  /*
+   * Offline Entropy-based Password Strength Detector
+   */
+  function evaluateStrength(str) {
+    if (!str) return { score: 0, label: "Empty", percent: 0, color: "#cbd5e1" };
+
+    var poolSize = 0;
+    if (/[a-z]/.test(str)) poolSize += 26;
+    if (/[A-Z]/.test(str)) poolSize += 26;
+    if (/[0-9]/.test(str)) poolSize += 10;
+    if (/[^a-zA-Z0-9]/.test(str)) poolSize += 32;
+
+    if (poolSize === 0) poolSize = 1;
+
+    // Entropy calculation: E = L * log2(R)
+    var entropy = str.length * (Math.log(poolSize) / Math.log(2));
+
+    if (entropy < 28) {
+      return { label: "Very Weak", percent: 20, color: "#ef4444" };
+    } else if (entropy < 36) {
+      return { label: "Weak", percent: 40, color: "#f97316" };
+    } else if (entropy < 60) {
+      return { label: "Moderate", percent: 60, color: "#f59e0b" };
+    } else if (entropy < 128) {
+      return { label: "Strong", percent: 80, color: "#10b981" };
+    } else {
+      return { label: "Very Strong", percent: 100, color: "#059669" };
+    }
+  }
+
+  function updateStrength(value) {
+    var result = evaluateStrength(value);
+    strengthContainer.style.display = "flex";
+    strengthBar.style.width = result.percent + "%";
+    strengthBar.style.backgroundColor = result.color;
+    strengthText.textContent = "Strength: " + result.label;
+    strengthText.style.color = result.color;
+  }
+
+  function showStatus(message, type) {
+    status.textContent = message || "";
+    status.className = "status" + (type ? " " + type : "");
+  }
+
+  function generate() {
+    showStatus("");
+
+    var sets = selectedSets();
+
+    if (!sets.length) {
+      showStatus("At least one character set must be selected.", "error");
+      return;
+    }
+
+    var value = lengthInput.value.trim();
+
+    if (!value) {
+      showStatus("Length or pattern is required.", "error");
+      lengthInput.focus();
+      return;
+    }
+
+    try {
+      var result;
+
+      if (/^[0-9]+$/.test(value)) {
+        var length = Number(value);
+
+        if (!Number.isSafeInteger(length) || length < 1) {
+          throw new Error("Length must be a positive whole number.");
+        }
+
+        if (length > 10000) {
+          throw new Error("Maximum length is 10,000.");
+        }
+
+        result = randomLength(length, sets);
+      } else {
+        result = randomPattern(value, sets);
+
+        if (!result.length) throw new Error("Pattern cannot be empty.");
+      }
+
+      output.textContent = result;
+      output.classList.remove("placeholder");
+      updateStrength(result);
+      showStatus("Generated with cryptographically secure randomness.", "success");
+    } catch (error) {
+      showStatus(error.message || "Generation failed.", "error");
+    }
+  }
+
+  generateButton.addEventListener("click", generate);
+
+  lengthInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") generate();
+  });
+
+  copyButton.addEventListener("click", function () {
+    var value = output.textContent;
+
+    if (output.classList.contains("placeholder")) {
+      showStatus("Generate a key first.", "error");
+      return;
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(value).then(function () {
+        showStatus("Copied to clipboard.", "success");
+      }).catch(function () {
+        showStatus("Could not access the clipboard.", "error");
+      });
+    } else {
+      var temp = document.createElement("textarea");
+      temp.value = value;
+      temp.style.position = "fixed";
+      temp.style.left = "-9999px";
+      document.body.appendChild(temp);
+      temp.focus();
+      temp.select();
+
+      try {
+        document.execCommand("copy");
+        showStatus("Copied to clipboard.", "success");
+      } catch (e) {
+        showStatus("Copy is unavailable in this browser.", "error");
+      }
+
+      document.body.removeChild(temp);
+    }
+  });
+
+  document.querySelectorAll('input[name="set"]').forEach(function (box) {
+    box.addEventListener("change", function () {
+      if (selectedSets().length === 0) {
+        box.checked = true;
+        showStatus("At least one character set must remain selected.", "error");
+      } else {
+        showStatus("");
+      }
+    });
+  });
+
+  generate();
+})();
+</script>
+</body>
+</html>
